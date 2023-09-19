@@ -35,7 +35,7 @@ button:hover {
 }
 
 .dropdown:hover {
-    border: 1px solid gray;
+    border: 1px solid #aaa;
     background: #ddd;
 }
 
@@ -57,10 +57,15 @@ button:hover {
     border: 1px solid #ddd;
 }
 
-.dropdown:hover .dropdown-content:hover h3:hover{
+.dropdown .dropdown-content h3:hover{
     background: #bbb;
     color:#000;
     border: 1px solid gray;
+}
+
+.line:hover {
+    background-color: #bbbbbb;
+    cursor: pointer;
 }
 
 p {
@@ -103,4 +108,8 @@ canvas {
 video {
     border: 1px solid gray;
     border-radius: 4px;
+}
+
+.empty {
+    border: 2px solid #bbb;
 }

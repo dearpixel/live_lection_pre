@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-
+<!--Данная страница выполняет только функции записи лекций-->
 <html lang="ru">
 
 <head>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="style.css" type="text/css">
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
   <title>Мультимедиа лекции</title>
 </head>
 
@@ -14,7 +15,18 @@
   max-width: 80%;
   margin: auto;">
     <tr>
-      <td style="float:left">
+      <td>
+        <div class="dropdown">
+          <h3 style="width: 30px;"><center>?</center></h3>
+          <div class="dropdown-content">
+            <h3><center>Перед записью видео необходимо добавить слайд-картинку</center></h3>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="width: 100px;"> </div>
+      </td>
+      <td>
         <div class="dropdown">
           <h3 id="project_name">Название проекта: пустой проект</h3>
           <div class="dropdown-content">
@@ -26,23 +38,20 @@
         </div>
       </td>
       <td>
-        <div style="width:60px"></div>
-      </td>
-      <td style="float:left">
-        <h3 id="slideID">Текущий слайд: 1</h3>
+        <div style="width:100px"> </div>
       </td>
       <td>
-        <div style="width:60px"> </div>
+        <h3 id="slideID">Текущий слайд: 0</h3>
       </td>
-      <td style="float:right">
+      <!--<td style="float:right">
         <div class="dropdown">
-          <h3 id="mode">Режим: просмотр</h3>
+          <h3 id="mode">Режим: редактор</h3>
           <div class="dropdown-content">
             <h3 id="mode1">Режим: просмотр</h3>
             <h3 id="mode2">Режим: редактор</h3>
           </div>
         </div>
-      </td>
+      </td>-->
     </tr>
   </table>
   <!--Основной контент-->
@@ -68,31 +77,16 @@
         <table>
           <tr>
             <td style="border: 1px solid gray; border-radius: 4px; background-color: #ddd">
-              <div style="width: 200px; height:300px; overflow: auto;">
-                <p>Тригонометрические уравнения 1
-                <p>Тригонометрические уравнения 2
-                <p>Тригонометрические уравнения 3
-                <p>Тригонометрические уравнения 4
-                <p>Тригонометрические уравнения 5
-                <p>Тригонометрические уравнения 6
-                <p>Тригонометрические уравнения 7
-                <p>Тригонометрические уравнения 8
-                <p>Тригонометрические уравнения 9
-                <p>Тригонометрические уравнения 10
-                <p>Тригонометрические уравнения 11
-                <p>Тригонометрические уравнения 12
-                <p>Тригонометрические уравнения 13
-                <p>Тригонометрические уравнения 14
-                <p>Тригонометрические уравнения 15
-                <p>Тригонометрические уравнения 16
+              <div id="slide_list" style="width: 200px; height:300px; overflow: auto;">
+                <!--Список слайдов-->
               </div>
             </td>
           </tr>
           <tr>
             <td>
               <center>
-                <button>Создать слайд</button>
-                <button>Удалить</button>
+                <button id="new_slide_button">Создать слайд</button>
+                <button id="del_slide_button">Удалить</button>
               </center>
             </td>
           </tr>
@@ -102,14 +96,20 @@
         <table>
           <tr>
             <td>
-              <video width="400" height="30" id="gum" autoplay muted></video>
+              <video width="400" height="300" id="gum" autoplay muted></video>
             </td>
           </tr>
           <tr>
             <td>
               <center>
-                <button id="record">Запись</button>
-                <button id="stop">Стоп</button>
+                <div class="dropdown">
+                  <h3 style="width: 30px;"><center>?</center></h3>
+                  <div class="dropdown-content" style="width: 120px">
+                    <h3><center>Перед записью видео необходимо добавить слайд-картинку</center></h3>
+                  </div>
+                </div>
+                <button id="record" disabled>Запись</button>
+                <button id="stop" disabled>Стоп</button>
                 <button id="play" disabled>Просмотр</button>
               </center>
             </td>
@@ -119,7 +119,8 @@
       <td>
         <center>
           <canvas id="canvas" width="550" height="300"></canvas>
-          <button onclick="undo()">Отменить</button>
+          <button id="undo" class="empty"><image src="/images/prev.png"></image></button>
+          <button id="next" class="empty"><image src="/images/next.png"></image></button>
           <input type="range" id="size" min="1" max="40" value="4">
           <input type="color" id="color" value="#000000">
           <input type="file" id="image" accept="image/*">
