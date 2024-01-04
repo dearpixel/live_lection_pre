@@ -1,0 +1,15 @@
+php_flag display_startup_errors on
+
+php_flag display_errors on
+
+php_flag html_errors on
+
+
+        if (move_uploaded_file($_FILES['voice']['tmp_name'], $targetFile)) {
+            echo "Видео успешно сохранено: " . $targetFile;
+        } else {
+            echo "Ошибка при сохранении видео.";
+        }
+    } else {
+        echo "Видео не было загружено.";
+    }
