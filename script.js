@@ -52,7 +52,6 @@ let fileUploadButton = document.getElementById('file-upload-button');
 let image = document.getElementById('image');
 let rec_circle = document.querySelector('.rec_circle');
 let sendPicButton = document.getElementById('sendPicture');
-
 let debugline = document.getElementById('debug');
 
 // Переменные и константы
@@ -67,20 +66,11 @@ let penSize = 3; // Размер кисти
 let penColor = '#000'; // Цвет кисти
 let slideList = []; // 3 индикатор завершённости слайда (4 адрес сценария пометок)
 
-/*
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------*/
-
 function updateDebug() {// Обновление информации для дебага
     debugline.innerHTML =
         'Шаг: ' + undoID + '<br>' +
         'Слайд: ' + slideID + '<br>' +
+        'Длина списка отмены: ' + undoList.length + '<br>' +
         'Название слайда: ' + get_slide(slideID, 0) + '<br>' +
         'Адрес видео: ' + get_slide(slideID, 1) + '<br>' +
         'Адрес картинки: ' + get_slide(slideID, 2) + '<br>' +
@@ -110,8 +100,11 @@ function load_slideList() {// Загрузка списка слайдов ле�
 };
 
 function add_frame() {// Добавление кадра для отмены
-    undoList.length = undoID + 1;
+    if (undoList[0] != null) {
+        undoList.length = undoID + 1;
+    }
     let newFrame = [context.getImageData(0, 0, canvas.width, canvas.height), Date.now()];
+    undoList = undoList.slice(0, undoID);
     undoList.push(newFrame);
     undoID = undoList.length - 1;
     //context.drawImage(undoList[undoID][0], 0, 0,100,100);
@@ -184,8 +177,8 @@ function stop_drawing() {// Прекращение рисования
 };
 
 function undo() {// Отмена действия
-    if (undoID < 2) return;
-    if (undoID == 2) undoImg.src = '/resources/images/undoOff.png';
+    if (undoID < 1) return;
+    if (undoID == 1) undoImg.src = '/resources/images/undoOff.png';
     redoImg.src = '/resources/images/redo.png';
     undoID--;
     context.putImageData(undoList[undoID][0], 0, 0);
@@ -348,7 +341,7 @@ load_slideList();
 initVideo();
 updateDebug();
 
-// Действия
+// Действия по событию
 recordButton.onclick = start_recording;
 stopButton.onclick = () => mediaRecorder.stop();
 renameButton.onclick = () => projectName.innerHTML = 'Название проекта: ' + input('Введите название проекта');
