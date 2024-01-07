@@ -104,7 +104,7 @@ function add_frame() {// Добавление кадра для отмены
         undoList.length = undoID + 1;
     }
     let newFrame = [context.getImageData(0, 0, canvas.width, canvas.height), Date.now()];
-    undoList = undoList.slice(0, undoID);
+    //undoList = undoList.slice(0, undoID); 
     undoList.push(newFrame);
     undoID = undoList.length - 1;
     //context.drawImage(undoList[undoID][0], 0, 0,100,100);
