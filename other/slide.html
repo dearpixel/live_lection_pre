@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Рисование на слайде</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.15/paper-full.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <button id="recordButton">Запись</button>
+  <button id="stopButton">Стоп</button>
+  <button id="playButton">Воспроизведение</button>
+
+  <script>
+    // Инициализация Paper.js
+    paper.install(window);
+    paper.setup('canvas');
+
+    // Переменные для записи и воспроизведения рисунка
+    let recordedPath;
+    let playbackPath;
+
+    // Обработчик события нажатия кнопки "Запись"
+    document.getElementById('recordButton').addEventListener('click', function() {
+      recordedPath = new Path();
+      recordedPath.strokeColor = 'black';
+      recordedPath.strokeWidth = 3;
+
+      function onMouseDrag(event) {
+        recordedPath.add(event.point);
+      }
+
+      view.on('mousedrag', onMouseDrag);
+    });
+
+    // Обработчик события нажатия кнопки "Стоп"
+    document.getElementById('stopButton').addEventListener('click', function() {
+      view.off('mousedrag');
+    });
+
+    // Обработчик события нажатия кнопки "Воспроизведение"
+    document.getElementById('playButton').addEventListener('click', function() {
+      playbackPath = recordedPath.clone();
+      playbackPath.strokeColor = 'red';
+      playbackPath.strokeWidth = 3;
+
+      let i = 0;
+      let timer = setInterval(function() {
+        if (i >= playbackPath.segments.length) {
+          clearInterval(timer);
+          return;
+        }
+
+        playbackPath.segments[i].selected = true;
+        view.update();
+
+        if (i > 0) {
+          playbackPath.segments[i - 1].selected = false;
+        }
+
+        i++;
+      }, 100);
+    });
+  </script>
+</body>
+</html>

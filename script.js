@@ -29,10 +29,13 @@ function UrlExists(url) {
 
 function input(text) {
   // Запрос текста
-  let result = prompt(text);
-  if (result == null || result.length < 1)
-    alert("Название слайда должно состоять, как минимум, из 1 символа!");
-  else return result;
+  let result = "";
+  while (result == null || result.length < 1) {
+    result = prompt(text);
+    if (result == null || result.length < 1)
+      alert("Название слайда должно состоять, как минимум, из 1 символа!");
+  }
+  return result;
 }
 
 // Кнопки и прочие элементы страницы
@@ -42,7 +45,7 @@ let stopButton = document.getElementById("stop_recording");
 let playButton = document.getElementById("play_button");
 let projectName = document.getElementById("projectName");
 let slideName = document.getElementById("slideName");
-let renameButton = document.getElementById("renameNutton");
+let renameButton = document.getElementById("projectName");
 let delSlideButton = document.getElementById("delSlideButton");
 let newSlideButton = document.getElementById("newSlideButton");
 let undoButton = document.getElementById("undo");
@@ -59,37 +62,62 @@ let rec_circle = document.querySelector(".rec_circle");
 let sendPicButton = document.getElementById("sendPicture");
 let debugline = document.getElementById("debug");
 
-// Переменные и константы
-let context = canvas.getContext("2d");
-let lastX = 0,
-  lastY = 0,
-  hue = 0,
-  slideID = 0,
-  undoID = 0;
-let isDrawing = false,
-  isRecording = false;
-let mediaRecorder; // Писатель
-let chunks = []; // Для записи видео
-let undoList = []; // Для отмены действий на полотне
-let lectionList = []; // Для хранения информации о лекциях
-let penSize = 3; // Размер кисти
-let penColor = "#000"; // Цвет кисти
-let slideList = []; // 3 индикатор завершённости слайда (4 адрес сценария пометок)
+let userID = 45; // ID пользователя, пока абстрактный
 
-function updateDebug() {
-  // Обновление информации для дебага
-  debugline.innerHTML =
-    "Шаг: " + undoID + "<br>" +
-    "Слайд: " + slideID + "<br>" +
-    "Длина списка отмены: " + undoList.length + "<br>" +
-    "Название слайда: " + get_slide(slideID, 0) + "<br>" +
-    "Адрес видео: " + get_slide(slideID, 1) + "<br>" +
-    "Адрес картинки: " + get_slide(slideID, 2) + "<br>" +
-    "Слайд готов: " + get_slide(slideID, 3) + "<br>";
+class cStep {
+  constructor() {
+    this.stepPath = ""; // path to picture of step
+  }
 }
 
+class cSlide {
+  constructor(name) {
+    this.name = name;
+    this.videoPath = "";
+    this.currStep = 0; // current step
+    this.steps = [];
+    this.steps[this.pos] = new cStep();
+  }
+}
+
+class cLection {
+  constructor(name, ownerID) {
+    this.name = name;
+    this.ownerID = ownerID;
+    this.currSlide = 0; // current slide
+    this.slides = [];
+    this.slides[this.pos] = new cSlide();
+  }
+  get getSlide() {
+    return this.slides[this.currSlide];
+  }
+  set pushSlide(newSlide) {
+    let nSlide = new cSlide(newSlide);
+    this.slides.push(nSlide);
+  }
+}
+
+let lection = new cLection('random',userID);
+
+// Переменные и константы
+let lectionList = []; // Для хранения информации о лекциях
+let slideID = 0;
+let undoID = 0;
+let undoList = []; // Для отмены действий на полотне
+let slideList = []; // 3 индикатор завершённости слайда, 4 адрес сценария пометок
+let context = canvas.getContext("2d");
+let penSize = 3; // Размер кисти
+let penColor = "#000"; // Цвет кисти
+let lastX = 0;
+let lastY = 0;
+let hue = 0;
+let isDrawing = false;
+let isRecording = false;
+let mediaRecorder; // Писатель
+let chunks = []; // Для записи видео
+
 function updateArrows() {
-  if (undoList.length == 0) {
+  if (undoList[slideID].length == 0) {
     undoImg.src = "/resources/images/undoOff.png";
     redoImg.src = "/resources/images/redoOff.png";
   } else {
@@ -98,7 +126,7 @@ function updateArrows() {
     } else {
       undoImg.src = "/resources/images/undoOff.png";
     }
-    if (undoID < undoList.length - 1) {
+    if (undoID < undoList[slideID].length - 1) {
       redoImg.src = "/resources/images/redo.png";
     } else {
       redoImg.src = "/resources/images/redoOff.png";
@@ -109,7 +137,7 @@ function updateArrows() {
 function update_slideList() {
   // Обновить поле со слайдами
   pageSlides.innerHTML = "<ol>";
-  for (i = 0; i < slideList.length; i++) {
+  for (i = 0; i < lection.slides.length; i++) {
     let done = "";
     if (get_slide(i, 3) == "yes") done = " ✓";
     if (i == slideID)
@@ -134,47 +162,37 @@ function update_slideList() {
 
 function updatePage() {
   // Обновляет все кнопки и инфу
-  updateDebug();
+  //updateDebug();
   updateArrows();
   update_slideList();
 }
 
 function login() {
-  // Авторизация и загрузка лекций пользователя
-}
-
-function load_profile() {
-  // Загрузка профиля пользователя
-}
-
-function load_lection_list() {
-  // Загрузка списка лекций пользователя
+  //projectName.innerHTML =
+  //  "Название проекта: " + input("Введите название проекта");
 }
 
 function gen_slideList() {
   // Генерация тестового списка слайдов
   for (let i = 0; i < 100; i++) {
-    slideList.push("Слайд " + i + ", videoURL, pictureURL, no");
+    lection.pushSlide = "Слайд " + i;
   }
-}
-function load_slideList() {
-  // Загрузка списка слайдов лекции пользователя
   update_slideList();
-  slideName.innerHTML = get_slide(slideID, 0);
+  slideName.innerHTML = lection.getSlide.name;
 }
 
 function add_frame() {
   // Добавление кадра для отмены
-  if (undoList[0] != null) {
-    undoList.length = undoID + 1;
+  if (undoList[slideID][0] != null) {
+    undoList[slideID].length = undoID + 1;
   }
   let newFrame = [
     context.getImageData(0, 0, canvas.width, canvas.height),
     Date.now(),
   ];
-  undoList = undoList.slice(0, undoID + 1);
-  undoList.push(newFrame);
-  undoID = undoList.length - 1;
+  undoList[slideID] = undoList[slideID].slice(0, undoID + 1);
+  undoList[slideID].push(newFrame);
+  undoID = undoList[slideID].length - 1;
   updatePage();
 }
 
@@ -190,7 +208,7 @@ function onImageChange(e) {
     img.onload = () => {
       context.drawImage(img, 0, 0, canvas.width, canvas.height);
       //add_frame();
-      updateDebug();
+      //updateDebug();
     };
     recordButton.disabled = false;
   };
@@ -248,15 +266,15 @@ function undo() {
   // Отмена действия
   if (undoID <= 0) return;
   undoID--;
-  context.putImageData(undoList[undoID][0], 0, 0);
+  context.putImageData(undoList[slideID][undoID][0], 0, 0);
   updatePage();
 }
 
 function redo() {
   // Повтор действия
-  if (undoID >= undoList.length - 1) return;
+  if (undoID >= undoList[slideID].length - 1) return;
   undoID++;
-  context.putImageData(undoList[undoID][0], 0, 0);
+  context.putImageData(undoList[slideID][undoID][0], 0, 0);
   updatePage();
 }
 
@@ -296,20 +314,16 @@ function onStopMediaRecorder() {
   video.srcObject = null;
   video.src = tmpFilePath;
   video.controls = true;
-  updateDebug();
+  //updateDebug();
 }
 
 function play_lection() {
   // Воспроизведение видео и пометок
-  for (let i = 0; i < undoList.length - 1; i++) {
-    alert(undoList[i][0]);
-    alert(undoList[i][1]);
-  }
 }
 
 function get_slide(num, num2) {
   // Получить данные слайда
-  return slideList[num].split(", ")[num2];
+  return lection.slides[num].name;
 }
 
 function set_slide(num, num2, value) {
@@ -363,7 +377,7 @@ function update_slide(num) {
   slideID = num;
   slideName.innerHTML = get_slide(slideID, 0);
   update_slideList();
-  updateDebug();
+  //updateDebug();
 }
 
 function del_slide() {
@@ -390,13 +404,12 @@ function change_slide_name(num) {
   // Изменить название слайда
   set_slide(num, 0, input("Введите новое название слайда"));
   slideName.innerHTML = get_slide(slideID, 0);
-  updateDebug();
+  //updateDebug();
 }
 
 // Инициализация
 login();
 gen_slideList();
-load_slideList();
 initVideo();
 updatePage();
 
@@ -438,3 +451,18 @@ document.addEventListener("keydown", (e) => {
     update_slide(slideID + 1);
   }
 });
+
+// Неиспользуемые функции
+
+/*function updateDebug() {
+  // Обновление информации для дебага
+  debugline.innerHTML =
+    "Шаг: " + undoID + "<br>" +
+    "Слайд: " + slideID + "<br>" +
+    "Длина списка отмены: " + undoList[slideID].length + "<br>" +
+    "Название слайда: " + get_slide(slideID, 0) + "<br>" +
+    "Адрес видео: " + get_slide(slideID, 1) + "<br>" +
+    "Адрес картинки: " + get_slide(slideID, 2) + "<br>" +
+    "Слайд готов: " + get_slide(slideID, 3) + "<br>";
+}
+*/

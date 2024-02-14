@@ -18,14 +18,36 @@ error_reporting(E_ALL);
 
     <!--Переключение слайдов-->
     <tr>
+      <td colspan="2">
+        <div class='dropdown'>
+          <h3 id='projectOwner'>Аркадий Фёдорович</h3>
+          <div class='dropdown-content'>
+            <button id='newLectionButton' name='Создать слайд'>Создать лекцию</button>
+            <button id='exitProfileButton' name='Выход из профиля'>Выход</button>
+          </div>
+        </div>
+        <hr>
+      </td>
+    </tr>
+    <tr>
       <td>
         <div class='dropdown'>
-          <h3 id='projectName'>Название проекта: пустой проект</h3>
+          <h3 id='projectName'>Название проекта: Биология 3-й класс</h3>
           <div class='dropdown-content'>
-            <h3 id='renameNutton'>Переименовать</h3>
-            <h3 id='loadProject'>Загрузить</h3>
-            <h3 id='saveProject'>Сохранить</h3>
-            <h3 id='delProject'>Удалить</h3>
+            <table>
+              <tr>
+                <td>
+                  <div id='lectionList' style='width: 500px; height:410px; overflow: auto; border: 1px solid gray; border-radius: 4px; background-color: #ddd'>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button id='saveLectionButton' name='Сохранить лекцию'>Сохранить лекцию</button>
+                  <button id='delLectionButton' name='Удалить слайд'>Удалить</button>
+                </td>
+              </tr>
+            </table>
           </div>
         </div>
       </td>
@@ -42,10 +64,8 @@ error_reporting(E_ALL);
               </tr>
               <tr>
                 <td>
-                  <center>
-                    <button id='newSlideButton' name='Создать слайд'>Создать слайд</button>
-                    <button id='delSlideButton' name='Удалить слайд'>Удалить</button>
-                  </center>
+                  <button id='newSlideButton' name='Создать слайд'>Создать слайд</button>
+                  <button id='delSlideButton' name='Удалить слайд'>Удалить</button>
                 </td>
               </tr>
             </table>
