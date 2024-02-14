@@ -19,16 +19,16 @@ function gen_fileName() {
   return fileName;
 }
 
-// Файл или путь существует
 function UrlExists(url) {
+  // Файл или путь существует
   var http = new XMLHttpRequest();
   http.open("HEAD", url, false);
   http.send();
   return http.status != 404;
 }
 
-// Запрос текста
 function input(text) {
+  // Запрос текста
   let result = prompt(text);
   if (result == null || result.length < 1)
     alert("Название слайда должно состоять, как минимум, из 1 символа!");
@@ -79,27 +79,13 @@ let slideList = []; // 3 индикатор завершённости слай�
 function updateDebug() {
   // Обновление информации для дебага
   debugline.innerHTML =
-    "Шаг: " +
-    undoID +
-    "<br>" +
-    "Слайд: " +
-    slideID +
-    "<br>" +
-    "Длина списка отмены: " +
-    undoList.length +
-    "<br>" +
-    "Название слайда: " +
-    get_slide(slideID, 0) +
-    "<br>" +
-    "Адрес видео: " +
-    get_slide(slideID, 1) +
-    "<br>" +
-    "Адрес картинки: " +
-    get_slide(slideID, 2) +
-    "<br>" +
-    "Слайд готов: " +
-    get_slide(slideID, 3) +
-    "<br>";
+    "Шаг: " + undoID + "<br>" +
+    "Слайд: " + slideID + "<br>" +
+    "Длина списка отмены: " + undoList.length + "<br>" +
+    "Название слайда: " + get_slide(slideID, 0) + "<br>" +
+    "Адрес видео: " + get_slide(slideID, 1) + "<br>" +
+    "Адрес картинки: " + get_slide(slideID, 2) + "<br>" +
+    "Слайд готов: " + get_slide(slideID, 3) + "<br>";
 }
 
 function updateArrows() {
@@ -189,7 +175,6 @@ function add_frame() {
   undoList = undoList.slice(0, undoID + 1);
   undoList.push(newFrame);
   undoID = undoList.length - 1;
-  //context.drawImage(undoList[undoID][0], 0, 0,100,100);
   updatePage();
 }
 
@@ -419,8 +404,8 @@ updatePage();
 recordButton.onclick = start_recording;
 stopButton.onclick = () => mediaRecorder.stop();
 renameButton.onclick = () =>
-  (projectName.innerHTML =
-    "Название проекта: " + input("Введите название проекта"));
+(projectName.innerHTML =
+  "Название проекта: " + input("Введите название проекта"));
 playButton.onclick = play_lection;
 newSlideButton.onclick = new_slide;
 delSlideButton.onclick = del_slide;
