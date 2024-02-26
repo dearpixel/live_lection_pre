@@ -6,14 +6,13 @@ function rnd2(min, max) {
   return min + Math.floor(Math.random() * (max - min));
 }
 function percent(value) {
-  if (rnd(100.0) < value) return true;
-  else return false;
+  return rnd(100.0) < value;
 }
 function gen_fileName() {
   let fileName = "";
   for (let i = 0; i < 20; i += 1) {
     if (percent(50)) fileName += String.fromCharCode(rnd2(48, 57));
-    else if (percent(50)) fileName += String.fromCharCode(rnd2(65, 90));
+    else if (percent(51)) fileName += String.fromCharCode(rnd2(65, 90));
     else fileName += String.fromCharCode(rnd2(97, 122));
   }
   return fileName;
@@ -21,7 +20,7 @@ function gen_fileName() {
 
 function UrlExists(url) {
   // Файл или путь существует
-  var http = new XMLHttpRequest();
+  let http = new XMLHttpRequest();
   http.open("HEAD", url, false);
   http.send();
   return http.status != 404;
@@ -64,47 +63,73 @@ let debugline = document.getElementById("debug");
 
 let userID = 45; // ID пользователя, пока абстрактный
 
-class cStep {
+// Содержит все действия подряд
+class CStep {
   constructor() {
     this.stepPath = ""; // path to picture of step
+    this.time = 0; // time since start recording to show this 
+  }
+  get getStep() {
+    return this.stepPath;
   }
 }
 
-class cSlide {
+class CSlide {
   constructor(name) {
     this.name = name;
     this.videoPath = "";
+    this.done = false;
     this.currStep = 0; // current step
     this.steps = [];
-    this.steps[this.pos] = new cStep();
+    this.steps[this.pos] = new CStep();
+  }
+  get getStep() {
+    return this.steps[this.currStep];
   }
 }
 
-class cLection {
+class CLection {
   constructor(name, ownerID) {
     this.name = name;
     this.ownerID = ownerID;
     this.currSlide = 0; // current slide
     this.slides = [];
-    this.slides[this.pos] = new cSlide();
+    this.slides[this.pos] = new CSlide();
   }
   get getSlide() {
     return this.slides[this.currSlide];
   }
   set pushSlide(newSlide) {
-    let nSlide = new cSlide(newSlide);
+    let nSlide = new CSlide(newSlide);
     this.slides.push(nSlide);
   }
 }
 
-let lection = new cLection('random',userID);
+let lection = new CLection('random', userID);
+
+// Содержит список действий для отмены
+class CEditeData {
+  constructor() {
+    this.undoList = [];
+    this.undoID = 0;
+  }
+
+  get getUndo() {
+    return undoList[undoID];
+  }
+
+  get getFUndo() {
+    return undoList;
+  }
+
+  set setUndo(new_undoID) {
+    this.undoID = new_undoID;
+  }
+}
+
+let edit = new CEditeData();
 
 // Переменные и константы
-let lectionList = []; // Для хранения информации о лекциях
-let slideID = 0;
-let undoID = 0;
-let undoList = []; // Для отмены действий на полотне
-let slideList = []; // 3 индикатор завершённости слайда, 4 адрес сценария пометок
 let context = canvas.getContext("2d");
 let penSize = 3; // Размер кисти
 let penColor = "#000"; // Цвет кисти
@@ -137,15 +162,15 @@ function updateArrows() {
 function update_slideList() {
   // Обновить поле со слайдами
   pageSlides.innerHTML = "<ol>";
-  for (i = 0; i < lection.slides.length; i++) {
+  for (let i = 0; i < lection.slides.length; i++) {
     let done = "";
-    if (get_slide(i, 3) == "yes") done = " ✓";
-    if (i == slideID)
+    if (lection.getSlide.done) done = " ✓";
+    if (i == lection.currSlide)
       pageSlides.innerHTML +=
         "<li class=line onclick=change_slide_name(" +
         i +
         ")><strong>" +
-        get_slide(i, 0) +
+        lection.slides[i].name +
         done +
         "</strong></li>";
     else
@@ -153,7 +178,7 @@ function update_slideList() {
         "<li class=line onclick=update_slide(" +
         i +
         ")>" +
-        get_slide(i, 0) +
+        lection.slides[i].name +
         done +
         "</li>";
   }
@@ -161,15 +186,13 @@ function update_slideList() {
 }
 
 function updatePage() {
-  // Обновляет все кнопки и инфу
-  //updateDebug();
-  updateArrows();
+  // Обновляет все кнопки
+  //updateArrows();
   update_slideList();
 }
 
 function login() {
-  //projectName.innerHTML =
-  //  "Название проекта: " + input("Введите название проекта");
+  console.log('login function');
 }
 
 function gen_slideList() {
@@ -183,7 +206,7 @@ function gen_slideList() {
 
 function add_frame() {
   // Добавление кадра для отмены
-  if (undoList[slideID][0] != null) {
+  if (edit.getFUndo[slideID][0] != null) {
     undoList[slideID].length = undoID + 1;
   }
   let newFrame = [
@@ -192,7 +215,7 @@ function add_frame() {
   ];
   undoList[slideID] = undoList[slideID].slice(0, undoID + 1);
   undoList[slideID].push(newFrame);
-  undoID = undoList[slideID].length - 1;
+  edit.setUndo = edit.undoList[slideID].length - 1;
   updatePage();
 }
 
@@ -208,7 +231,6 @@ function onImageChange(e) {
     img.onload = () => {
       context.drawImage(img, 0, 0, canvas.width, canvas.height);
       //add_frame();
-      //updateDebug();
     };
     recordButton.disabled = false;
   };
@@ -231,7 +253,7 @@ function onImageChange(e) {
     .catch((error) => {
       console.error("Error:", error);
     });
-  set_slide(slideID, 2, tmpFilePath);
+  set_slide(lection.currSlide, 2, tmpFilePath);
 }
 
 function start_drawing(e) {
@@ -280,7 +302,7 @@ function redo() {
 
 function start_recording() {
   // Начало записи
-  if (get_slide(slideID, 2) == "pictureURL") return;
+  if (lection.getSlide == "pictureURL") return;
   stopButton.disabled = false;
   isRecording = recordButton.disabled = true;
   rec_circle.style.display = "block"; // Анимация записи видео
@@ -314,16 +336,10 @@ function onStopMediaRecorder() {
   video.srcObject = null;
   video.src = tmpFilePath;
   video.controls = true;
-  //updateDebug();
 }
 
 function play_lection() {
   // Воспроизведение видео и пометок
-}
-
-function get_slide(num, num2) {
-  // Получить данные слайда
-  return lection.slides[num].name;
 }
 
 function set_slide(num, num2, value) {
@@ -331,7 +347,7 @@ function set_slide(num, num2, value) {
   let slide = slideList[num].split(", ");
   slide[num2] = value;
   slideList[num] = "";
-  for (i = 0; i < slide.length; i++) {
+  for (let i = 0; i < slide.length; i++) {
     slideList[num] += slide[i];
     if (i < slide.length - 1) slideList[num] += ", ";
   }
@@ -355,29 +371,25 @@ function update_slide(num) {
   // Переключение на заданный слайд
   if (num < 0 || num > slideList.length - 1) return;
   // Смена картинки и видео
-  var img = new Image();
-  if (UrlExists(get_slide(num, 2))) {
-    img.src = get_slide(num, 2);
+  let img = new Image();
+  if (UrlExists(lection.getSlide.done)) {
+    img.src = lection.getSlide.done;
     img.onload = () =>
       context.drawImage(img, 0, 0, canvas.width, canvas.height);
   } else {
     context.clearRect(0, 0, canvas.width, canvas.height);
     recordButton.disabled = true;
   }
-  if (UrlExists(get_slide(num, 1))) {
-    video.src = get_slide(num, 1);
-  } else {
-    if (UrlExists(get_slide(slideID, 1))) {
-      initVideo();
-      video.controls = false;
-    }
+  if (UrlExists(lection.getSlide.videoPath)) {
+    video.src = lection.getSlide.videoPath;
+    initVideo();
+    video.controls = false;
   }
-  if (get_slide(num, 3) == "yes") playButton.style = "display: inline";
+  if (lection.getSlide.done) playButton.style = "display: inline";
   else playButton.style = "display: none";
   slideID = num;
-  slideName.innerHTML = get_slide(slideID, 0);
+  slideName.innerHTML = lection.getSlide.name;
   update_slideList();
-  //updateDebug();
 }
 
 function del_slide() {
@@ -403,8 +415,7 @@ function new_slide() {
 function change_slide_name(num) {
   // Изменить название слайда
   set_slide(num, 0, input("Введите новое название слайда"));
-  slideName.innerHTML = get_slide(slideID, 0);
-  //updateDebug();
+  slideName.innerHTML = lection.getSlide.name;
 }
 
 // Инициализация
@@ -451,18 +462,3 @@ document.addEventListener("keydown", (e) => {
     update_slide(slideID + 1);
   }
 });
-
-// Неиспользуемые функции
-
-/*function updateDebug() {
-  // Обновление информации для дебага
-  debugline.innerHTML =
-    "Шаг: " + undoID + "<br>" +
-    "Слайд: " + slideID + "<br>" +
-    "Длина списка отмены: " + undoList[slideID].length + "<br>" +
-    "Название слайда: " + get_slide(slideID, 0) + "<br>" +
-    "Адрес видео: " + get_slide(slideID, 1) + "<br>" +
-    "Адрес картинки: " + get_slide(slideID, 2) + "<br>" +
-    "Слайд готов: " + get_slide(slideID, 3) + "<br>";
-}
-*/
